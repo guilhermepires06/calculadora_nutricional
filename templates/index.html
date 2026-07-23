@@ -1,0 +1,3581 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sistema profissional de planejamento alimentar com planos salvos e identidade personalizada." />
+  <title>Planejamento Nutricional</title>
+  <style>
+
+:root {
+  --page: #eef2f6;
+  --surface: #ffffff;
+  --surface-soft: #f7f9fc;
+  --surface-muted: #edf2f7;
+  --sidebar: #101a2d;
+  --sidebar-soft: #17243a;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --border: #dce3ec;
+  --border-strong: #c8d2df;
+  --text: #172033;
+  --text-soft: #3d4a5f;
+  --muted: #718096;
+  --primary: #0f766e;
+  --primary-hover: #115e59;
+  --primary-soft: #e8f7f4;
+  --primary-border: #a8ddd5;
+  --warning: #b7791f;
+  --danger: #c53030;
+  --danger-soft: #fff5f5;
+  --white: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 18px 42px rgba(15, 23, 42, 0.09);
+  --radius-sm: 9px;
+  --radius-md: 13px;
+  --radius-lg: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text);
+  background: var(--page);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+img {
+  max-width: 100%;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.app-shell {
+  width: min(100%, 1480px);
+  min-height: 100vh;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  background: var(--surface);
+  box-shadow: 0 0 50px rgba(15, 23, 42, 0.08);
+}
+
+.main-sidebar {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+  color: #eef4ff;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.025), transparent 28%),
+    var(--sidebar);
+  border-right: 1px solid rgba(15, 23, 42, 0.18);
+}
+
+.side-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 2px 7px 23px;
+  margin-bottom: 19px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.brand-logo-box,
+.settings-logo-preview {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #ffffff;
+  border: 1px solid rgba(255,255,255,.15);
+}
+
+.brand-logo-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+}
+
+.brand-logo-box img,
+.settings-logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+}
+
+.logo-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.side-brand-copy {
+  min-width: 0;
+}
+
+.side-brand-copy strong {
+  display: block;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-brand-copy span {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: #9fb0c8;
+  font-size: .78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-section-title {
+  margin: 18px 10px 8px;
+  color: #71829b;
+  font-size: .67rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.primary-nav,
+.planner-steps {
+  display: grid;
+  gap: 6px;
+}
+
+.nav-button,
+.step-button {
+  width: 100%;
+  min-height: 47px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #b9c5d6;
+  background: transparent;
+  text-align: left;
+  font-size: .88rem;
+  font-weight: 700;
+  transition: .16s ease;
+}
+
+.nav-button:hover,
+.step-button:hover {
+  color: #ffffff;
+  background: var(--sidebar-soft);
+}
+
+.nav-button.active {
+  color: #ffffff;
+  border-color: rgba(255,255,255,.08);
+  background: var(--sidebar-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.nav-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  color: #c8d4e4;
+  background: rgba(255,255,255,.035);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.nav-button.active .nav-icon {
+  color: #062f2c;
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.step-button {
+  min-height: 43px;
+  padding: 7px 10px;
+  font-size: .82rem;
+}
+
+.step-button.active {
+  color: #ffffff;
+  border-color: rgba(15,118,110,.34);
+  background: rgba(15,118,110,.19);
+}
+
+.step-number {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 7px;
+  color: #aebbcf;
+  background: rgba(255,255,255,.035);
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.step-button.active .step-number {
+  color: #062f2c;
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.sidebar-spacer {
+  flex: 1;
+}
+
+.mini-summary {
+  margin-top: 22px;
+  padding: 14px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 11px;
+  background: rgba(255,255,255,.035);
+}
+
+.mini-summary small {
+  display: block;
+  margin-bottom: 5px;
+  color: #8292aa;
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.mini-summary strong {
+  color: #ffffff;
+  font-size: 1.08rem;
+}
+
+.sidebar-version {
+  margin-top: 14px;
+  color: #64748b;
+  font-size: .67rem;
+  text-align: center;
+}
+
+.main-area {
+  min-width: 0;
+  min-height: 100vh;
+  background: var(--surface-soft);
+}
+
+.topbar {
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 23px 34px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.96);
+}
+
+.page-eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--primary);
+  font-size: .67rem;
+  font-weight: 900;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.topbar h1 {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -.026em;
+}
+
+.topbar p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.save-status {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: .76rem;
+  white-space: nowrap;
+}
+
+.view-container {
+  padding: 28px 34px 42px;
+}
+
+.app-view {
+  display: none;
+}
+
+.app-view.active {
+  display: block;
+}
+
+.content-card,
+.page-card,
+.settings-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.content-card {
+  overflow: hidden;
+}
+
+.step {
+  display: none;
+  padding: 30px;
+}
+
+.step.active {
+  display: block;
+}
+
+.section-title,
+.page-header {
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title h2,
+.page-header h2 {
+  margin-bottom: 6px;
+  font-size: clamp(1.45rem, 3vw, 1.9rem);
+  letter-spacing: -.022em;
+}
+
+.section-title p,
+.page-header p {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-size: .86rem;
+  font-weight: 750;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="color"],
+select,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--text);
+  background: #ffffff;
+  font-weight: 600;
+  transition: .16s ease;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 11px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+textarea {
+  min-height: 96px;
+  padding: 12px 13px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, .10);
+}
+
+.helper {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: .77rem;
+  line-height: 1.45;
+}
+
+.goal-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.goal-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.goal-card span {
+  min-height: 94px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text-soft);
+  background: var(--surface-soft);
+  text-align: center;
+  transition: .15s ease;
+}
+
+.goal-card strong {
+  font-size: .93rem;
+}
+
+.goal-card small {
+  color: var(--muted);
+}
+
+.goal-card input:checked + span {
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary-border);
+}
+
+.targets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 13px;
+  margin-top: 20px;
+}
+
+.target-card {
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-soft);
+}
+
+.target-card small {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.target-card strong {
+  color: var(--primary);
+  font-size: clamp(1.28rem, 3vw, 1.72rem);
+}
+
+details {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-soft);
+}
+
+summary {
+  cursor: pointer;
+  color: var(--text-soft);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 17px;
+}
+
+.quick-button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-soft);
+  background: #ffffff;
+  font-size: .8rem;
+  font-weight: 700;
+  transition: .14s ease;
+}
+
+.quick-button:hover {
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.food-search {
+  margin-bottom: 18px;
+}
+
+.food-group {
+  margin-bottom: 15px;
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.food-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.food-group h3 {
+  font-size: .96rem;
+}
+
+.food-count {
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip span {
+  display: inline-block;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-soft);
+  background: #ffffff;
+  font-size: .79rem;
+  font-weight: 650;
+  user-select: none;
+  transition: .14s ease;
+}
+
+.chip input:checked + span {
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.chip.hidden-by-search,
+.food-group.hidden-by-search {
+  display: none;
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 9px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.primary,
+.secondary,
+.danger-button,
+.ghost-button {
+  min-height: 44px;
+  padding: 0 17px;
+  border-radius: 9px;
+  font-size: .84rem;
+  font-weight: 800;
+  transition: .14s ease;
+}
+
+.primary {
+  border: 1px solid var(--primary);
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.primary:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.secondary {
+  color: var(--text-soft);
+  border: 1px solid var(--border-strong);
+  background: #ffffff;
+}
+
+.secondary:hover {
+  color: var(--text);
+  border-color: #9aa8ba;
+  background: var(--surface-soft);
+}
+
+.ghost-button {
+  color: var(--primary);
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.ghost-button:hover {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.danger-button {
+  color: var(--danger);
+  border: 1px solid #fed7d7;
+  background: var(--danger-soft);
+}
+
+.danger-button:hover {
+  background: #ffe8e8;
+}
+
+.error {
+  min-height: 22px;
+  margin-top: 11px;
+  color: var(--danger);
+  font-size: .83rem;
+  font-weight: 700;
+}
+
+.plan-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-header h2 {
+  margin-bottom: 4px;
+  font-size: clamp(1.42rem, 3vw, 1.88rem);
+  letter-spacing: -.022em;
+}
+
+.plan-header p {
+  color: var(--muted);
+  font-size: .87rem;
+}
+
+.plan-meta-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 11px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-soft);
+}
+
+.editing-badge {
+  align-self: center;
+  padding: 7px 10px;
+  border: 1px solid #bee3f8;
+  border-radius: 999px;
+  color: #2b6cb0;
+  background: #ebf8ff;
+  font-size: .72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.day-tabs {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  margin-bottom: 17px;
+  padding-bottom: 5px;
+  scrollbar-width: thin;
+}
+
+.day-tab {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-soft);
+  background: #ffffff;
+  font-size: .8rem;
+  font-weight: 750;
+  transition: .14s ease;
+}
+
+.day-tab:hover {
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.day-tab.active {
+  color: #ffffff;
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.day-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.summary-chip {
+  padding: 7px 10px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+.meal-list {
+  display: grid;
+  gap: 13px;
+}
+
+.meal-card {
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.meal-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 11px;
+  margin-bottom: 13px;
+}
+
+.meal-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.meal-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--primary-border);
+  border-radius: 9px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: .65rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.meal-name h3 {
+  font-size: .98rem;
+}
+
+.meal-macros {
+  color: var(--warning);
+  font-size: .76rem;
+  font-weight: 800;
+  text-align: right;
+  line-height: 1.45;
+}
+
+.food-items {
+  display: grid;
+  gap: 8px;
+}
+
+.food-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 11px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.food-item-main {
+  min-width: 0;
+}
+
+.food-item-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: .63rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.food-item-name {
+  color: var(--text-soft);
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.food-item-name strong {
+  color: var(--primary);
+}
+
+.item-swap-button,
+.swap-button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  color: var(--text-soft);
+  background: #ffffff;
+  font-size: .7rem;
+  font-weight: 750;
+  transition: .14s ease;
+}
+
+.item-swap-button:hover,
+.swap-button:hover {
+  color: var(--primary);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.meal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 11px;
+}
+
+.notice {
+  margin-top: 17px;
+  padding: 14px;
+  border-left: 3px solid #d69e2e;
+  border-radius: 8px;
+  color: var(--text-soft);
+  background: #fffaf0;
+  font-size: .78rem;
+  line-height: 1.58;
+}
+
+/* Saved plans */
+.saved-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.saved-plan-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 225px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-plan-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.saved-plan-title {
+  overflow: hidden;
+  margin-bottom: 3px;
+  color: var(--text);
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-plan-client {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.saved-plan-date {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: .7rem;
+  white-space: nowrap;
+}
+
+.saved-plan-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.saved-metric {
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.saved-metric small {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: .63rem;
+}
+
+.saved-metric strong {
+  color: var(--text-soft);
+  font-size: .8rem;
+}
+
+.saved-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.saved-plan-actions button {
+  min-height: 36px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: .73rem;
+  font-weight: 800;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  padding: 35px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 13px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.empty-state-box {
+  max-width: 390px;
+}
+
+.empty-state-mark {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border: 1px solid var(--primary-border);
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.empty-state h3 {
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.empty-state p {
+  margin-bottom: 16px;
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+/* Settings */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 17px;
+}
+
+.settings-card {
+  padding: 20px;
+}
+
+.settings-card h3 {
+  margin-bottom: 5px;
+  font-size: .98rem;
+}
+
+.settings-card > p {
+  margin-bottom: 17px;
+  color: var(--muted);
+  font-size: .81rem;
+  line-height: 1.5;
+}
+
+.settings-logo-preview {
+  width: 100%;
+  height: 150px;
+  margin-bottom: 13px;
+  border-color: var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.settings-logo-preview .logo-fallback {
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 17px;
+}
+
+.config-note {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: .75rem;
+  line-height: 1.5;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.theme-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.theme-swatch {
+  display: block;
+  height: 38px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  transition: .14s ease;
+}
+
+.theme-option input:checked + .theme-swatch {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px var(--border-strong);
+}
+
+.theme-teal { background: #0f766e; }
+.theme-navy { background: #1e3a8a; }
+.theme-blue { background: #2563eb; }
+.theme-green { background: #047857; }
+.theme-graphite { background: #475569; }
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  max-width: min(380px, calc(100vw - 32px));
+  padding: 12px 15px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 10px;
+  color: #ffffff;
+  background: #182235;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, .25);
+  font-size: .82rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: .2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.print-sheet {
+  display: none;
+}
+
+.print-branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 17px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #dbe3ec;
+}
+
+.print-brand-logo {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.print-brand-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.print-brand-logo span {
+  color: #0f766e;
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.print-branding strong {
+  display: block;
+  color: #172033;
+  font-size: 1rem;
+}
+
+.print-branding small {
+  color: #718096;
+}
+
+.print-cover,
+.print-day-card {
+  border: 1px solid #dbe3ec;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.print-cover {
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.print-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: #0f766e;
+  background: #e8f7f4;
+  font-size: .69rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.print-cover h3 {
+  margin-bottom: 5px;
+  color: #172033;
+  font-size: 1.45rem;
+}
+
+.print-cover p {
+  color: #718096;
+  font-size: .88rem;
+}
+
+.print-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.print-summary-card {
+  padding: 11px;
+  border: 1px solid #dbe3ec;
+  border-radius: 8px;
+  background: #f7f9fc;
+}
+
+.print-summary-card small {
+  display: block;
+  margin-bottom: 4px;
+  color: #718096;
+  font-size: .69rem;
+}
+
+.print-summary-card strong {
+  color: #0f766e;
+  font-size: .9rem;
+}
+
+.print-observation {
+  margin-top: 12px;
+  padding: 11px;
+  border-left: 3px solid #d69e2e;
+  border-radius: 7px;
+  color: #3d4a5f;
+  background: #fffaf0;
+  font-size: .8rem;
+}
+
+.print-days {
+  display: grid;
+  gap: 10px;
+}
+
+.print-day-card {
+  overflow: hidden;
+  break-inside: avoid;
+}
+
+.print-day-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 11px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #dbe3ec;
+  background: #f1faf8;
+}
+
+.print-day-header h4 {
+  color: #172033;
+  font-size: .94rem;
+}
+
+.print-day-header small {
+  color: #718096;
+  font-size: .69rem;
+}
+
+.print-day-total {
+  color: #975a16;
+  font-size: .74rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.print-meals {
+  padding: 7px 13px 10px;
+}
+
+.print-meal-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px dashed #dbe3ec;
+}
+
+.print-meal-row:last-child {
+  border-bottom: 0;
+}
+
+.print-meal-name {
+  margin-bottom: 2px;
+  color: #172033;
+  font-size: .84rem;
+  font-weight: 900;
+}
+
+.print-foods {
+  color: #4a5568;
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.print-meal-macros {
+  min-width: 92px;
+  color: #0f766e;
+  font-size: .71rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.print-note {
+  margin-top: 12px;
+  color: #718096;
+  font-size: .69rem;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .app-shell {
+    grid-template-columns: 245px minmax(0, 1fr);
+  }
+
+  .saved-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  body {
+    padding-bottom: 76px;
+  }
+
+  .app-shell {
+    display: block;
+    min-height: auto;
+  }
+
+  .main-sidebar {
+    display: none;
+  }
+
+  .main-area {
+    min-height: 100vh;
+  }
+
+  .topbar {
+    min-height: auto;
+    align-items: flex-start;
+    padding: 18px 16px;
+  }
+
+  .topbar-actions {
+    display: none;
+  }
+
+  .view-container {
+    padding: 15px 12px 24px;
+  }
+
+  .content-card,
+  .page-card {
+    border-radius: 13px;
+  }
+
+  .step {
+    padding: 19px;
+  }
+
+  .form-grid,
+  .goal-cards,
+  .targets,
+  .plan-meta-bar,
+  .saved-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: auto;
+  }
+
+  .page-header,
+  .plan-header,
+  .footer-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-header button,
+  .plan-header button,
+  .footer-actions > button,
+  .footer-actions .button-group {
+    width: 100%;
+  }
+
+  .button-group {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+
+  .food-item-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .item-swap-button {
+    width: 100%;
+  }
+
+  .meal-top {
+    flex-direction: column;
+  }
+
+  .meal-macros {
+    text-align: left;
+  }
+
+  .saved-plan-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .theme-options {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .mobile-nav {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 70;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255,255,255,.96);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px);
+  }
+
+  .mobile-nav button {
+    min-height: 46px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--muted);
+    background: transparent;
+    font-size: .72rem;
+    font-weight: 800;
+  }
+
+  .mobile-nav button.active {
+    color: #ffffff;
+    background: var(--primary);
+  }
+
+  .toast {
+    right: 16px;
+    bottom: 82px;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 11mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #172033 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .main-sidebar,
+  .topbar,
+  .mobile-nav,
+  #step1,
+  #step2,
+  .plan-header,
+  .plan-meta-bar,
+  #dayTabs,
+  #daySummary,
+  #mealList,
+  .notice,
+  .footer-actions,
+  #savedView,
+  #settingsView {
+    display: none !important;
+  }
+
+  .app-shell,
+  .main-area,
+  .view-container,
+  #plannerView,
+  .content-card {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  #step3 {
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .print-sheet {
+    display: block !important;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="main-sidebar">
+      <div class="side-brand">
+        <div class="brand-logo-box">
+          <img id="sidebarLogo" class="hidden" alt="Logotipo" />
+          <div id="sidebarLogoFallback" class="logo-fallback">NUT</div>
+        </div>
+        <div class="side-brand-copy">
+          <strong id="sidebarBrandName">NutriPlan</strong>
+          <span id="sidebarBrandSubtitle">Planejamento alimentar</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section-title">Menu principal</div>
+      <nav class="primary-nav">
+        <button class="nav-button active" type="button" data-view="planner">
+          <span class="nav-icon">NP</span>
+          <span>Novo planejamento</span>
+        </button>
+        <button class="nav-button" type="button" data-view="saved">
+          <span class="nav-icon">PS</span>
+          <span>Planos salvos</span>
+        </button>
+        <button class="nav-button" type="button" data-view="settings">
+          <span class="nav-icon">CF</span>
+          <span>Configurações</span>
+        </button>
+      </nav>
+
+      <div id="plannerSteps">
+        <div class="sidebar-section-title">Etapas do plano</div>
+        <div class="planner-steps">
+          <button class="step-button active" type="button" data-step="1">
+            <span class="step-number">1</span>
+            <span>Dados iniciais</span>
+          </button>
+          <button class="step-button" type="button" data-step="2">
+            <span class="step-number">2</span>
+            <span>Preferências</span>
+          </button>
+          <button class="step-button" type="button" data-step="3">
+            <span class="step-number">3</span>
+            <span>Plano semanal</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-spacer"></div>
+
+      <div id="sidebarSummary" class="mini-summary">
+        <small>Meta diária estimada</small>
+        <strong id="miniCalories">0 kcal</strong>
+      </div>
+      <div class="sidebar-version">Banco de dados: SQLite</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div>
+          <span id="pageEyebrow" class="page-eyebrow">Planejamento</span>
+          <h1 id="pageTitle">Novo plano alimentar</h1>
+          <p id="pageSubtitle">Preencha os dados para montar um cronograma personalizado.</p>
+        </div>
+        <div class="topbar-actions">
+          <span id="saveStatus" class="save-status">Pronto para começar</span>
+          <button id="topNewPlan" class="secondary" type="button">Novo plano</button>
+        </div>
+      </header>
+
+      <div class="view-container">
+        <section id="plannerView" class="app-view active">
+          <div class="content-card">
+            <div id="step1" class="step active">
+              <div class="section-title">
+                <h2>Informações iniciais</h2>
+                <p>Informe os dados básicos e selecione o perfil de energia desejado para o planejamento.</p>
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="name">Nome da pessoa</label>
+                  <input id="name" type="text" placeholder="Ex.: Guilherme" />
+                </div>
+
+                <div class="field">
+                  <label for="weight">Peso atual</label>
+                  <input id="weight" type="number" min="0" max="500" step="0.1" value="0" />
+                  <p class="helper">Informe o peso em quilogramas.</p>
+                </div>
+
+                <div class="field">
+                  <label for="mealCount">Refeições por dia</label>
+                  <select id="mealCount">
+                    <option value="3">3 refeições</option>
+                    <option value="4" selected>4 refeições</option>
+                    <option value="5">5 refeições</option>
+                    <option value="6">6 refeições</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="routine">Tipo de rotina</label>
+                  <select id="routine">
+                    <option value="quick">Refeições rápidas</option>
+                    <option value="normal" selected>Preparo convencional</option>
+                    <option value="varied">Maior variedade</option>
+                  </select>
+                </div>
+
+                <div class="field full">
+                  <label>Perfil do planejamento</label>
+                  <div class="goal-cards">
+                    <label class="goal-card">
+                      <input type="radio" name="goal" value="light" />
+                      <span>
+                        <strong>Mais leve</strong>
+                        <small>Peso × 18 kcal</small>
+                      </span>
+                    </label>
+                    <label class="goal-card">
+                      <input type="radio" name="goal" value="balanced" checked />
+                      <span>
+                        <strong>Equilibrado</strong>
+                        <small>Peso × 20 kcal</small>
+                      </span>
+                    </label>
+                    <label class="goal-card">
+                      <input type="radio" name="goal" value="high" />
+                      <span>
+                        <strong>Mais energia</strong>
+                        <small>Peso × 24 kcal</small>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="targets">
+                <article class="target-card">
+                  <small>Calorias estimadas</small>
+                  <strong id="calories">0 kcal</strong>
+                </article>
+                <article class="target-card">
+                  <small>Proteína estimada</small>
+                  <strong id="protein">0 g</strong>
+                </article>
+                <article class="target-card">
+                  <small>Água estimada</small>
+                  <strong id="water">0,00 L</strong>
+                </article>
+              </div>
+
+              <details>
+                <summary>Ajustes avançados de cálculo</summary>
+                <div class="form-grid" style="margin-top:14px">
+                  <div class="field">
+                    <label for="calorieFactor">Calorias por kg</label>
+                    <input id="calorieFactor" type="number" min="1" step="0.1" value="20" />
+                  </div>
+                  <div class="field">
+                    <label for="proteinFactor">Proteína por kg</label>
+                    <input id="proteinFactor" type="number" min="0.1" step="0.1" value="2" />
+                  </div>
+                </div>
+              </details>
+
+              <div class="footer-actions">
+                <span></span>
+                <button class="primary" type="button" data-next="2">Continuar</button>
+              </div>
+            </div>
+
+            <div id="step2" class="step">
+              <div class="section-title">
+                <h2>Preferências alimentares</h2>
+                <p>Selecione os alimentos que poderão ser utilizados no plano. Quanto mais opções, maior a variedade.</p>
+              </div>
+
+              <div class="quick-actions">
+                <button id="commonPreset" class="quick-button" type="button">Seleção comum</button>
+                <button id="noFishPreset" class="quick-button" type="button">Sem peixe</button>
+                <button id="noMilkPreset" class="quick-button" type="button">Sem leite</button>
+                <button id="vegetarianPreset" class="quick-button" type="button">Vegetariano</button>
+                <button id="selectAll" class="quick-button" type="button">Marcar tudo</button>
+                <button id="clearAll" class="quick-button" type="button">Limpar seleção</button>
+              </div>
+
+              <div class="field food-search">
+                <label for="foodSearch">Pesquisar alimento</label>
+                <input id="foodSearch" type="search" placeholder="Digite o nome do alimento..." autocomplete="off" />
+              </div>
+
+              <div id="foodGroups"></div>
+
+              <div class="field">
+                <label for="avoid">Restrições ou alimentos a evitar</label>
+                <textarea id="avoid" placeholder="Ex.: evitar leite, não utilizar cebola, não consumo peixe..."></textarea>
+              </div>
+
+              <div id="formError" class="error" aria-live="polite"></div>
+
+              <div class="footer-actions">
+                <button class="secondary" type="button" data-back="1">Voltar</button>
+                <button id="generatePlan" class="primary" type="button">Gerar planejamento</button>
+              </div>
+            </div>
+
+            <div id="step3" class="step">
+              <div class="plan-header">
+                <div>
+                  <h2 id="planTitle">Plano semanal</h2>
+                  <p id="planSubtitle">O planejamento será exibido após o preenchimento das etapas anteriores.</p>
+                </div>
+                <button class="secondary" type="button" onclick="window.print()">Imprimir</button>
+              </div>
+
+              <div class="plan-meta-bar">
+                <div class="field">
+                  <label for="planName">Nome do plano salvo</label>
+                  <input id="planName" type="text" placeholder="Ex.: Plano semanal - Guilherme" />
+                </div>
+                <span id="editingBadge" class="editing-badge hidden">Editando plano salvo</span>
+                <button id="savePlan" class="primary" type="button">Salvar plano</button>
+              </div>
+
+              <div id="dayTabs" class="day-tabs"></div>
+              <div id="daySummary" class="day-summary"></div>
+              <div id="mealList" class="meal-list"></div>
+              <div id="printPlan" class="print-sheet"></div>
+
+              <div class="notice">
+                Este planejamento é uma estimativa automática. Marcas, preparo e tamanhos reais das porções podem alterar os resultados. Casos clínicos, alergias e necessidades específicas devem ser avaliados por profissional habilitado.
+              </div>
+
+              <div class="footer-actions">
+                <button class="secondary" type="button" data-back="2">Editar preferências</button>
+                <div class="button-group">
+                  <button id="newPlan" class="secondary" type="button">Gerar nova semana</button>
+                  <button id="resetAll" class="danger-button" type="button">Limpar planejamento</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="savedView" class="app-view">
+          <div class="page-card" style="padding:24px">
+            <div class="page-header">
+              <div>
+                <h2>Planos salvos</h2>
+                <p>Abra, edite, duplique ou exclua os planejamentos armazenados no banco de dados SQLite.</p>
+              </div>
+              <button id="createPlanFromSaved" class="primary" type="button">Criar novo plano</button>
+            </div>
+
+            <div class="saved-toolbar">
+              <input id="savedSearch" type="search" placeholder="Pesquisar por nome do plano ou pessoa..." />
+              <button id="exportPlans" class="secondary" type="button">Exportar backup</button>
+            </div>
+
+            <div id="savedPlansList" class="saved-grid"></div>
+
+            <div id="savedEmpty" class="empty-state hidden">
+              <div class="empty-state-box">
+                <div class="empty-state-mark">PS</div>
+                <h3>Nenhum plano salvo</h3>
+                <p>Depois de gerar um planejamento, utilize o botão “Salvar plano” para mantê-lo disponível aqui.</p>
+                <button id="emptyCreatePlan" class="primary" type="button">Criar primeiro plano</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="settingsView" class="app-view">
+          <div class="page-card" style="padding:24px">
+            <div class="page-header">
+              <div>
+                <h2>Configurações</h2>
+                <p>Personalize a identidade visual utilizada no sistema e no documento impresso.</p>
+              </div>
+            </div>
+
+            <div class="settings-grid">
+              <article class="settings-card">
+                <h3>Logotipo</h3>
+                <p>Envie uma imagem PNG, JPG ou WebP. A imagem será otimizada e salva no banco de dados.</p>
+
+                <div class="settings-logo-preview">
+                  <img id="settingsLogoImage" class="hidden" alt="Prévia do logotipo" />
+                  <div id="settingsLogoFallback" class="logo-fallback">SEM LOGO</div>
+                </div>
+
+                <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" />
+
+                <div class="settings-actions">
+                  <button id="removeLogo" class="danger-button" type="button">Remover logo</button>
+                </div>
+
+                <div class="config-note">
+                  Para melhor resultado, utilize uma imagem horizontal ou quadrada com fundo transparente ou branco.
+                </div>
+              </article>
+
+              <article class="settings-card">
+                <h3>Identidade do sistema</h3>
+                <p>Essas informações aparecem na lateral, no topo e na impressão do planejamento.</p>
+
+                <div class="form-grid">
+                  <div class="field full">
+                    <label for="brandNameInput">Nome da marca ou profissional</label>
+                    <input id="brandNameInput" type="text" placeholder="Ex.: NutriVida" />
+                  </div>
+
+                  <div class="field full">
+                    <label for="brandSubtitleInput">Descrição curta</label>
+                    <input id="brandSubtitleInput" type="text" placeholder="Ex.: Planejamento alimentar personalizado" />
+                  </div>
+
+                  <div class="field full">
+                    <label for="professionalNameInput">Responsável</label>
+                    <input id="professionalNameInput" type="text" placeholder="Ex.: Guilherme Pires" />
+                  </div>
+
+                  <div class="field full">
+                    <label for="footerTextInput">Texto do rodapé da impressão</label>
+                    <textarea id="footerTextInput" placeholder="Ex.: Documento gerado para acompanhamento pessoal."></textarea>
+                  </div>
+
+                  <div class="field full">
+                    <label>Cor principal</label>
+                    <div class="theme-options">
+                      <label class="theme-option" title="Verde petróleo">
+                        <input type="radio" name="appTheme" value="teal" checked />
+                        <span class="theme-swatch theme-teal"></span>
+                      </label>
+                      <label class="theme-option" title="Azul marinho">
+                        <input type="radio" name="appTheme" value="navy" />
+                        <span class="theme-swatch theme-navy"></span>
+                      </label>
+                      <label class="theme-option" title="Azul">
+                        <input type="radio" name="appTheme" value="blue" />
+                        <span class="theme-swatch theme-blue"></span>
+                      </label>
+                      <label class="theme-option" title="Verde">
+                        <input type="radio" name="appTheme" value="green" />
+                        <span class="theme-swatch theme-green"></span>
+                      </label>
+                      <label class="theme-option" title="Grafite">
+                        <input type="radio" name="appTheme" value="graphite" />
+                        <span class="theme-swatch theme-graphite"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-actions">
+                  <button id="saveSettings" class="primary" type="button">Salvar configurações</button>
+                  <button id="resetSettings" class="secondary" type="button">Restaurar padrão</button>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <nav class="mobile-nav">
+    <button class="active" type="button" data-view="planner">Novo plano</button>
+    <button type="button" data-view="saved">Salvos</button>
+    <button type="button" data-view="settings">Config.</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+
+    const foodData = {
+      proteins: {
+        title: "Proteínas",
+        items: [
+          { id:"chicken", name:"Frango", amount:150, unit:"g", kcal:248, protein:46.5, common:true, meat:true },
+          { id:"groundBeef", name:"Carne moída magra", amount:150, unit:"g", kcal:300, protein:39, common:true, meat:true },
+          { id:"beef", name:"Carne bovina magra", amount:150, unit:"g", kcal:320, protein:39, common:false, meat:true },
+          { id:"porkLoin", name:"Lombo suíno", amount:150, unit:"g", kcal:275, protein:40, common:false, meat:true },
+          { id:"turkey", name:"Peito de peru", amount:120, unit:"g", kcal:162, protein:30, common:false, meat:true },
+          { id:"tilapia", name:"Tilápia", amount:150, unit:"g", kcal:192, protein:38.5, common:true, fish:true, meat:true },
+          { id:"salmon", name:"Salmão", amount:150, unit:"g", kcal:312, protein:33, common:false, fish:true, meat:true },
+          { id:"tuna", name:"Atum", amount:120, unit:"g", kcal:140, protein:31, common:false, fish:true, meat:true },
+          { id:"sardines", name:"Sardinha", amount:120, unit:"g", kcal:220, protein:29, common:false, fish:true, meat:true },
+          { id:"shrimp", name:"Camarão", amount:150, unit:"g", kcal:150, protein:32, common:false, fish:true, meat:true },
+          { id:"eggs", name:"Ovos", amount:2, unit:"un", kcal:140, protein:12, common:true },
+          { id:"eggWhites", name:"Claras de ovo", amount:150, unit:"g", kcal:78, protein:16.5, common:false },
+          { id:"yogurt", name:"Iogurte proteico", amount:170, unit:"g", kcal:120, protein:17, common:true, milk:true },
+          { id:"greekYogurt", name:"Iogurte grego natural", amount:170, unit:"g", kcal:145, protein:15, common:false, milk:true },
+          { id:"cheese", name:"Queijo branco", amount:80, unit:"g", kcal:170, protein:15, common:false, milk:true },
+          { id:"cottage", name:"Queijo cottage", amount:120, unit:"g", kcal:118, protein:14, common:false, milk:true },
+          { id:"beans", name:"Feijão", amount:100, unit:"g", kcal:76, protein:4.8, common:true },
+          { id:"lentils", name:"Lentilha", amount:100, unit:"g", kcal:93, protein:6.3, common:false },
+          { id:"chickpeas", name:"Grão-de-bico", amount:100, unit:"g", kcal:164, protein:8.9, common:false },
+          { id:"tofu", name:"Tofu", amount:150, unit:"g", kcal:120, protein:13, common:false },
+          { id:"soy", name:"Proteína de soja", amount:120, unit:"g", kcal:205, protein:28, common:false }
+        ]
+      },
+      carbs: {
+        title: "Carboidratos",
+        items: [
+          { id:"rice", name:"Arroz branco", amount:130, unit:"g", kcal:169, protein:3.5, common:true },
+          { id:"brownRice", name:"Arroz integral", amount:130, unit:"g", kcal:161, protein:3.4, common:false },
+          { id:"potato", name:"Batata inglesa", amount:180, unit:"g", kcal:157, protein:3.6, common:true },
+          { id:"sweetPotato", name:"Batata-doce", amount:180, unit:"g", kcal:154, protein:2.9, common:false },
+          { id:"pasta", name:"Macarrão", amount:140, unit:"g", kcal:220, protein:7, common:true },
+          { id:"wholePasta", name:"Macarrão integral", amount:140, unit:"g", kcal:205, protein:8, common:false },
+          { id:"cassava", name:"Mandioca", amount:150, unit:"g", kcal:188, protein:1.5, common:false },
+          { id:"yam", name:"Inhame", amount:170, unit:"g", kcal:165, protein:2.6, common:false },
+          { id:"bread", name:"Pão integral", amount:2, unit:"fatias", kcal:140, protein:6, common:true },
+          { id:"frenchBread", name:"Pão francês", amount:1, unit:"un", kcal:140, protein:4.5, common:false },
+          { id:"wrap", name:"Wrap integral", amount:1, unit:"un", kcal:170, protein:5, common:false },
+          { id:"tapioca", name:"Tapioca", amount:70, unit:"g", kcal:180, protein:.3, common:false },
+          { id:"oats", name:"Aveia", amount:40, unit:"g", kcal:152, protein:5.2, common:true },
+          { id:"couscous", name:"Cuscuz de milho", amount:150, unit:"g", kcal:170, protein:3.5, common:false },
+          { id:"quinoa", name:"Quinoa", amount:130, unit:"g", kcal:156, protein:5.7, common:false },
+          { id:"polenta", name:"Polenta", amount:180, unit:"g", kcal:153, protein:3.2, common:false },
+          { id:"corn", name:"Milho cozido", amount:140, unit:"g", kcal:135, protein:4.5, common:false },
+          { id:"granola", name:"Granola", amount:40, unit:"g", kcal:180, protein:4, common:false }
+        ]
+      },
+      fruits: {
+        title: "Frutas",
+        items: [
+          { id:"banana", name:"Banana", amount:1, unit:"un", kcal:90, protein:1.1, common:true },
+          { id:"apple", name:"Maçã", amount:1, unit:"un", kcal:80, protein:.3, common:true },
+          { id:"orange", name:"Laranja", amount:1, unit:"un", kcal:65, protein:1.2, common:false },
+          { id:"papaya", name:"Mamão", amount:180, unit:"g", kcal:78, protein:.9, common:true },
+          { id:"strawberry", name:"Morango", amount:150, unit:"g", kcal:48, protein:1, common:false },
+          { id:"grape", name:"Uva", amount:120, unit:"g", kcal:83, protein:.8, common:false },
+          { id:"pear", name:"Pera", amount:1, unit:"un", kcal:95, protein:.6, common:false },
+          { id:"pineapple", name:"Abacaxi", amount:180, unit:"g", kcal:90, protein:.9, common:false },
+          { id:"mango", name:"Manga", amount:160, unit:"g", kcal:96, protein:1.3, common:false },
+          { id:"watermelon", name:"Melancia", amount:250, unit:"g", kcal:75, protein:1.5, common:false },
+          { id:"melon", name:"Melão", amount:220, unit:"g", kcal:75, protein:1.7, common:false },
+          { id:"kiwi", name:"Kiwi", amount:2, unit:"un", kcal:85, protein:1.6, common:false },
+          { id:"guava", name:"Goiaba", amount:150, unit:"g", kcal:102, protein:3.9, common:false },
+          { id:"peach", name:"Pêssego", amount:2, unit:"un", kcal:78, protein:1.8, common:false },
+          { id:"avocado", name:"Abacate", amount:100, unit:"g", kcal:160, protein:2, common:false }
+        ]
+      },
+      vegetables: {
+        title: "Verduras e legumes",
+        items: [
+          { id:"salad", name:"Salada verde", amount:120, unit:"g", kcal:30, protein:2, common:true },
+          { id:"broccoli", name:"Brócolis", amount:120, unit:"g", kcal:42, protein:3.4, common:true },
+          { id:"carrot", name:"Cenoura", amount:100, unit:"g", kcal:41, protein:.9, common:true },
+          { id:"zucchini", name:"Abobrinha", amount:120, unit:"g", kcal:24, protein:1.8, common:false },
+          { id:"tomato", name:"Tomate e pepino", amount:150, unit:"g", kcal:35, protein:1.5, common:true },
+          { id:"mixedVeg", name:"Legumes variados", amount:150, unit:"g", kcal:55, protein:2.5, common:true },
+          { id:"cauliflower", name:"Couve-flor", amount:130, unit:"g", kcal:33, protein:2.5, common:false },
+          { id:"cabbage", name:"Repolho", amount:130, unit:"g", kcal:32, protein:1.7, common:false },
+          { id:"beet", name:"Beterraba", amount:120, unit:"g", kcal:52, protein:1.9, common:false },
+          { id:"pumpkin", name:"Abóbora", amount:160, unit:"g", kcal:64, protein:1.6, common:false },
+          { id:"eggplant", name:"Berinjela", amount:150, unit:"g", kcal:38, protein:1.5, common:false },
+          { id:"greenBeans", name:"Vagem", amount:130, unit:"g", kcal:40, protein:2.4, common:false },
+          { id:"chayote", name:"Chuchu", amount:160, unit:"g", kcal:30, protein:1.3, common:false },
+          { id:"spinach", name:"Espinafre", amount:100, unit:"g", kcal:23, protein:2.9, common:false },
+          { id:"kale", name:"Couve", amount:100, unit:"g", kcal:32, protein:2.7, common:false },
+          { id:"peas", name:"Ervilha", amount:100, unit:"g", kcal:81, protein:5.4, common:false }
+        ]
+      }
+    };
+
+    const mealNames = {
+      3: ["Café da manhã", "Almoço", "Jantar"],
+      4: ["Café da manhã", "Almoço", "Lanche da tarde", "Jantar"],
+      5: ["Café da manhã", "Lanche da manhã", "Almoço", "Lanche da tarde", "Jantar"],
+      6: ["Café da manhã", "Lanche da manhã", "Almoço", "Lanche da tarde", "Jantar", "Ceia"]
+    };
+
+    const mealIcons = {
+      "Café da manhã":"CM",
+      "Lanche da manhã":"LM",
+      "Almoço":"AL",
+      "Lanche da tarde":"LT",
+      "Jantar":"JN",
+      "Ceia":"CE"
+    };
+
+    const dayNames = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+
+    const state = {
+      currentStep: 1,
+      currentDay: 0,
+      currentView: "planner",
+      editingPlanId: null,
+      plan: [],
+      swapCounters: {},
+      itemSwapCounters: {}
+    };
+
+    const el = (id) => document.getElementById(id);
+    const weight = el("weight");
+    const calorieFactor = el("calorieFactor");
+    const proteinFactor = el("proteinFactor");
+    const mealCount = el("mealCount");
+    const routine = el("routine");
+
+    function format(value, decimals = 0) {
+      return Number(value).toLocaleString("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function getGoalFactor() {
+      const goal = document.querySelector('input[name="goal"]:checked')?.value || "balanced";
+      return { light:18, balanced:20, high:24 }[goal];
+    }
+
+    function getTargets() {
+      const kg = Number(weight.value);
+      const kcalFactor = Number(calorieFactor.value);
+      const proteinPerKg = Number(proteinFactor.value);
+
+      if (!Number.isFinite(kg) || kg <= 0) return null;
+
+      return {
+        kg,
+        calories: kg * kcalFactor,
+        protein: kg * proteinPerKg,
+        water: kg * 35
+      };
+    }
+
+    function updateTargets() {
+      const targets = getTargets();
+
+      if (!targets) {
+        el("calories").textContent = "0 kcal";
+        el("protein").textContent = "0 g";
+        el("water").textContent = "0,00 L";
+        el("miniCalories").textContent = "0 kcal";
+        return;
+      }
+
+      el("calories").textContent = `${format(targets.calories)} kcal`;
+      el("protein").textContent = `${format(targets.protein)} g`;
+      el("water").textContent = `${format(targets.water / 1000, 2)} L`;
+      el("miniCalories").textContent = `${format(targets.calories)} kcal`;
+      savePreferences();
+    }
+
+    function renderFoodGroups() {
+      const container = el("foodGroups");
+      container.innerHTML = "";
+
+      Object.entries(foodData).forEach(([key, group]) => {
+        const section = document.createElement("section");
+        section.className = "food-group";
+
+        section.innerHTML = `
+          <div class="food-group-header">
+            <h3>${group.title}</h3>
+            <span class="food-count" id="count-${key}"></span>
+          </div>
+          <div class="chips">
+            ${group.items.map(item => `
+              <label class="chip">
+                <input type="checkbox"
+                  data-group="${key}"
+                  value="${item.id}"
+                  ${item.common ? "checked" : ""}>
+                <span>${item.name}</span>
+              </label>
+            `).join("")}
+          </div>
+        `;
+
+        container.appendChild(section);
+      });
+
+      container.addEventListener("change", () => {
+        updateFoodCounts();
+        savePreferences();
+      });
+
+      updateFoodCounts();
+    }
+
+    function filterFoods() {
+      const term = (el("foodSearch")?.value || "")
+        .trim()
+        .toLocaleLowerCase("pt-BR");
+
+      document.querySelectorAll(".food-group").forEach(group => {
+        let visibleCount = 0;
+
+        group.querySelectorAll(".chip").forEach(chip => {
+          const text = chip.textContent.trim().toLocaleLowerCase("pt-BR");
+          const visible = !term || text.includes(term);
+          chip.classList.toggle("hidden-by-search", !visible);
+          if (visible) visibleCount += 1;
+        });
+
+        group.classList.toggle("hidden-by-search", visibleCount === 0);
+      });
+    }
+
+    function updateFoodCounts() {
+      Object.keys(foodData).forEach(key => {
+        const count = document.querySelectorAll(`input[data-group="${key}"]:checked`).length;
+        const target = el(`count-${key}`);
+        if (target) target.textContent = `${count} selecionado${count === 1 ? "" : "s"}`;
+      });
+    }
+
+    function applyPreset(type) {
+      document.querySelectorAll('.chip input[type="checkbox"]').forEach(input => {
+        const item = foodData[input.dataset.group].items.find(i => i.id === input.value);
+
+        if (type === "all") input.checked = true;
+        if (type === "clear") input.checked = false;
+        if (type === "common") input.checked = !!item.common;
+        if (type === "noFish") input.checked = item.fish ? false : !!item.common;
+        if (type === "noMilk") input.checked = item.milk ? false : !!item.common;
+        if (type === "vegetarian") {
+          if (input.dataset.group === "proteins") {
+            input.checked = !item.meat && ["eggs","yogurt","cheese","cottage","beans","lentils","chickpeas","tofu","soy"].includes(item.id);
+          } else {
+            input.checked = !!item.common;
+          }
+        }
+      });
+
+      updateFoodCounts();
+      savePreferences();
+    }
+
+    function selectedFoods(groupKey) {
+      const selectedIds = [...document.querySelectorAll(`input[data-group="${groupKey}"]:checked`)]
+        .map(input => input.value);
+
+      return foodData[groupKey].items.filter(item => selectedIds.includes(item.id));
+    }
+
+    function goToStep(step) {
+      state.currentStep = step;
+
+      document.querySelectorAll(".step").forEach(section => {
+        section.classList.toggle("active", section.id === `step${step}`);
+      });
+
+      document.querySelectorAll("[data-step]").forEach(button => {
+        button.classList.toggle("active", Number(button.dataset.step) === step);
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function roundPortion(value, unit) {
+      if (unit === "un" || unit === "fatias") {
+        return Math.max(.5, Math.round(value * 2) / 2);
+      }
+      if (value < 60) return Math.max(5, Math.round(value / 5) * 5);
+      return Math.max(10, Math.round(value / 10) * 10);
+    }
+
+    function portionText(value, unit, name) {
+      if (unit === "un") {
+        if (name === "Ovos") return `${format(value, Number.isInteger(value) ? 0 : 1)} ${value <= 1 ? "ovo" : "ovos"}`;
+        return `${format(value, Number.isInteger(value) ? 0 : 1)} ${value <= 1 ? "unidade" : "unidades"}`;
+      }
+
+      if (unit === "fatias") {
+        return `${format(value, Number.isInteger(value) ? 0 : 1)} ${value <= 1 ? "fatia" : "fatias"}`;
+      }
+
+      return `${format(value)} g`;
+    }
+
+    function pick(list, index, fallback) {
+      return list.length ? list[index % list.length] : fallback;
+    }
+
+
+    function buildMealItem(food, role, sourceGroup, swapKey) {
+      return {
+        ...food,
+        role,
+        sourceGroup,
+        swapKey
+      };
+    }
+
+    function getItemLabel(item) {
+      const labels = {
+        breakfastProtein: "Proteína",
+        breakfastCarb: "Carboidrato",
+        snackProtein: "Proteína",
+        snackCarb: "Carboidrato",
+        fruit: "Fruta",
+        mainProtein: "Proteína",
+        mainCarb: "Carboidrato",
+        vegetable: "Legume / Verdura",
+        legumeSide: "Acompanhamento"
+      };
+
+      return labels[item.swapKey] || "Alimento";
+    }
+
+    function getSwapPool(mealName, item, groups) {
+      const breakfastProteinIds = ["eggs","eggWhites","yogurt","greekYogurt","cheese","cottage","tuna","turkey","tofu"];
+      const breakfastCarbIds = ["bread","frenchBread","wrap","oats","tapioca","couscous","granola"];
+      const snackProteinIds = ["yogurt","greekYogurt","eggs","eggWhites","cheese","cottage","tuna","turkey","tofu"];
+      const snackCarbIds = ["bread","frenchBread","wrap","oats","tapioca","couscous","granola"];
+      const legumeIds = ["beans","lentils","chickpeas"];
+
+      if (item.swapKey === "breakfastProtein") {
+        return groups.proteins.filter(i => breakfastProteinIds.includes(i.id));
+      }
+
+      if (item.swapKey === "breakfastCarb") {
+        return groups.carbs.filter(i => breakfastCarbIds.includes(i.id));
+      }
+
+      if (item.swapKey === "snackProtein") {
+        return groups.proteins.filter(i => snackProteinIds.includes(i.id));
+      }
+
+      if (item.swapKey === "snackCarb") {
+        return groups.carbs.filter(i => snackCarbIds.includes(i.id));
+      }
+
+      if (item.swapKey === "fruit") {
+        return groups.fruits;
+      }
+
+      if (item.swapKey === "mainProtein") {
+        const filtered = groups.proteins.filter(i => !legumeIds.includes(i.id));
+        return filtered.length ? filtered : groups.proteins;
+      }
+
+      if (item.swapKey === "mainCarb") {
+        return groups.carbs;
+      }
+
+      if (item.swapKey === "vegetable") {
+        return groups.vegetables;
+      }
+
+      if (item.swapKey === "legumeSide") {
+        const filtered = groups.proteins.filter(i => legumeIds.includes(i.id));
+        return filtered.length ? filtered : groups.proteins;
+      }
+
+      if (item.sourceGroup === "proteins") return groups.proteins;
+      if (item.sourceGroup === "carbs") return groups.carbs;
+      if (item.sourceGroup === "fruits") return groups.fruits;
+      if (item.sourceGroup === "vegetables") return groups.vegetables;
+      return [];
+    }
+
+    function createMeal(name, dayIndex, mealIndex, groups, variant = 0) {
+      const shift = dayIndex + mealIndex + variant;
+      const protein = pick(groups.proteins, shift, foodData.proteins.items[0]);
+      const carb = pick(groups.carbs, shift * 2, foodData.carbs.items[0]);
+      const fruit = pick(groups.fruits, shift + mealIndex, foodData.fruits.items[0]);
+      const veg = pick(groups.vegetables, shift * 3, foodData.vegetables.items[0]);
+
+      const isBreakfast = name === "Café da manhã";
+      const isSnack = name.includes("Lanche") || name === "Ceia";
+      const isMain = name === "Almoço" || name === "Jantar";
+
+      let items = [];
+
+      if (isBreakfast) {
+        const breakfastProteins = groups.proteins.filter(i =>
+          ["eggs","eggWhites","yogurt","greekYogurt","cheese","cottage","tuna","turkey","tofu"].includes(i.id)
+        );
+        const breakfastCarbs = groups.carbs.filter(i =>
+          ["bread","frenchBread","wrap","oats","tapioca","couscous","granola"].includes(i.id)
+        );
+        const breakfastProtein = pick(breakfastProteins, shift + variant, protein);
+        const breakfastCarb = pick(breakfastCarbs, shift * 2 + variant, carb);
+        items = [
+          buildMealItem(breakfastProtein, "protein", "proteins", "breakfastProtein"),
+          buildMealItem(breakfastCarb, "energy", "carbs", "breakfastCarb"),
+          buildMealItem(fruit, "energy", "fruits", "fruit")
+        ];
+      } else if (isSnack) {
+        const snackProteins = groups.proteins.filter(i =>
+          ["yogurt","greekYogurt","eggs","eggWhites","cheese","cottage","tuna","turkey","tofu"].includes(i.id)
+        );
+        const snackCarbs = groups.carbs.filter(i =>
+          ["bread","frenchBread","wrap","oats","tapioca","couscous","granola"].includes(i.id)
+        );
+        const snackProtein = pick(snackProteins, shift + variant, protein);
+        const snackCarb = pick(snackCarbs, shift * 2 + variant, carb);
+
+        items = [
+          buildMealItem(snackProtein, "protein", "proteins", "snackProtein"),
+          buildMealItem(fruit, "energy", "fruits", "fruit")
+        ];
+
+        if (routine.value !== "quick") {
+          items.push(buildMealItem(snackCarb, "energy", "carbs", "snackCarb"));
+        }
+      } else if (isMain) {
+        items = [
+          buildMealItem(protein, "protein", "proteins", "mainProtein"),
+          buildMealItem(carb, "energy", "carbs", "mainCarb"),
+          buildMealItem(veg, "energy", "vegetables", "vegetable")
+        ];
+
+        const beans = groups.proteins.find(i => ["beans","lentils","chickpeas"].includes(i.id));
+        if (beans && beans.id !== protein.id) {
+          items.push(buildMealItem(beans, "energy", "proteins", "legumeSide"));
+        }
+      }
+
+      return { name, items };
+    }
+
+    function scaleDay(meals, targets) {
+      let kp = 0, pp = 0, ke = 0, pe = 0;
+
+      meals.forEach(meal => {
+        meal.items.forEach(item => {
+          if (item.role === "protein") {
+            kp += item.kcal;
+            pp += item.protein;
+          } else {
+            ke += item.kcal;
+            pe += item.protein;
+          }
+        });
+      });
+
+      const det = kp * pe - ke * pp;
+      let proteinScale = 1;
+      let energyScale = 1;
+
+      if (Math.abs(det) > .001) {
+        proteinScale = (targets.calories * pe - ke * targets.protein) / det;
+        energyScale = (kp * targets.protein - targets.calories * pp) / det;
+      } else {
+        const scale = targets.calories / Math.max(1, kp + ke);
+        proteinScale = scale;
+        energyScale = scale;
+      }
+
+      proteinScale = Math.min(Math.max(proteinScale, .35), 3.2);
+      energyScale = Math.min(Math.max(energyScale, .35), 3.2);
+
+      let totalCalories = 0;
+      let totalProtein = 0;
+
+      meals.forEach(meal => {
+        meal.calories = 0;
+        meal.protein = 0;
+
+        meal.items.forEach(item => {
+          const scale = item.role === "protein" ? proteinScale : energyScale;
+          item.finalAmount = roundPortion(item.amount * scale, item.unit);
+          const realScale = item.finalAmount / item.amount;
+          item.finalCalories = item.kcal * realScale;
+          item.finalProtein = item.protein * realScale;
+
+          meal.calories += item.finalCalories;
+          meal.protein += item.finalProtein;
+          totalCalories += item.finalCalories;
+          totalProtein += item.finalProtein;
+        });
+      });
+
+      return { meals, totalCalories, totalProtein };
+    }
+
+    function generatePlan(randomOffset = 0) {
+      const targets = getTargets();
+      const groups = {
+        proteins: selectedFoods("proteins"),
+        carbs: selectedFoods("carbs"),
+        fruits: selectedFoods("fruits"),
+        vegetables: selectedFoods("vegetables")
+      };
+
+      if (!targets) {
+        el("formError").textContent = "Informe um peso válido.";
+        goToStep(1);
+        return;
+      }
+
+      if (!groups.proteins.length || !groups.carbs.length) {
+        el("formError").textContent = "Marque pelo menos uma proteína e um carboidrato.";
+        return;
+      }
+
+      el("formError").textContent = "";
+      const names = mealNames[Number(mealCount.value)];
+
+      state.plan = dayNames.map((day, dayIndex) => {
+        const meals = names.map((mealName, mealIndex) =>
+          createMeal(mealName, dayIndex + randomOffset, mealIndex, groups)
+        );
+
+        const scaled = scaleDay(meals, targets);
+        return { day, ...scaled };
+      });
+
+      state.currentDay = 0;
+      state.swapCounters = {};
+      state.itemSwapCounters = {};
+
+      const userName = el("name").value.trim();
+      el("planTitle").textContent = userName ? `Plano de ${userName}` : "Plano semanal";
+
+      if (!el("planName").value.trim()) {
+        el("planName").value = userName
+          ? `Plano semanal - ${userName}`
+          : `Plano semanal - ${new Date().toLocaleDateString("pt-BR")}`;
+      }
+
+      updatePlanSaveState();
+
+      const avoid = el("avoid").value.trim();
+      el("planSubtitle").textContent = avoid
+        ? `Observação: ${avoid}`
+        : "Planejamento elaborado com os alimentos selecionados.";
+
+      renderDayTabs();
+      renderCurrentDay();
+      renderPrintLayout();
+      savePreferences();
+      goToStep(3);
+    }
+
+
+    function renderPrintLayout() {
+      const container = el("printPlan");
+      if (!container) return;
+
+      if (!state.plan.length) {
+        container.innerHTML = "";
+        return;
+      }
+
+      const targets = getTargets();
+      const userName = el("name").value.trim();
+      const avoid = el("avoid").value.trim();
+      const branding = getAppSettings();
+      const routineLabels = {
+        quick: "Opções rápidas",
+        normal: "Rotina normal",
+        varied: "Mais variedade"
+      };
+
+      const generationDate = new Date().toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+
+      const daysHtml = state.plan.map((day) => `
+        <section class="print-day-card">
+          <div class="print-day-header">
+            <div>
+              <h4>${day.day}</h4>
+              <small>Distribuição diária das refeições</small>
+            </div>
+            <div class="print-day-total">
+              ${format(day.totalCalories)} kcal<br>
+              ${format(day.totalProtein)} g proteína
+            </div>
+          </div>
+
+          <div class="print-meals">
+            ${day.meals.map((meal) => `
+              <div class="print-meal-row">
+                <div>
+                  <div class="print-meal-name">${meal.name}</div>
+                  <div class="print-foods">
+                    ${meal.items.map((item) =>
+                      `${item.name} (${portionText(item.finalAmount, item.unit, item.name)})`
+                    ).join(" • ")}
+                  </div>
+                </div>
+                <div class="print-meal-macros">
+                  ${format(meal.calories)} kcal<br>
+                  ${format(meal.protein)} g prot.
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+      `).join("");
+
+      container.innerHTML = `
+        <section class="print-cover">
+          <div class="print-branding">
+            <div class="print-brand-logo">
+              ${branding.logoData
+                ? `<img src="${branding.logoData}" alt="Logotipo">`
+                : `<span>${escapeHtml(getBrandInitials(branding.brandName))}</span>`}
+            </div>
+            <div>
+              <strong>${escapeHtml(branding.brandName)}</strong>
+              <small>${escapeHtml(branding.brandSubtitle)}</small>
+            </div>
+          </div>
+          <div class="print-kicker">PLANO ALIMENTAR SEMANAL</div>
+          <h3>${userName ? `Plano de ${userName}` : "Meu plano alimentar"}</h3>
+          <p>
+            Cardápio semanal personalizado, gerado em ${generationDate},
+            com base nos alimentos selecionados e na sua rotina.
+          </p>
+
+          <div class="print-summary-grid">
+            <div class="print-summary-card">
+              <small>Meta calórica</small>
+              <strong>${format(targets.calories)} kcal</strong>
+            </div>
+            <div class="print-summary-card">
+              <small>Meta de proteína</small>
+              <strong>${format(targets.protein)} g</strong>
+            </div>
+            <div class="print-summary-card">
+              <small>Água sugerida</small>
+              <strong>${format(targets.water / 1000, 2)} L</strong>
+            </div>
+            <div class="print-summary-card">
+              <small>Rotina escolhida</small>
+              <strong>${routineLabels[routine.value] || "Plano personalizado"}</strong>
+            </div>
+          </div>
+
+          ${avoid ? `
+            <div class="print-observation">
+              <strong>Observação informada:</strong> ${avoid}
+            </div>
+          ` : ""}
+        </section>
+
+        <div class="print-days">
+          ${daysHtml}
+        </div>
+
+        <div class="print-note">
+          ${escapeHtml(branding.footerText)}
+          ${branding.professionalName ? `<br>Responsável: ${escapeHtml(branding.professionalName)}` : ""}
+        </div>
+      `;
+    }
+
+    function renderDayTabs() {
+      const container = el("dayTabs");
+      container.innerHTML = "";
+
+      state.plan.forEach((day, index) => {
+        const button = document.createElement("button");
+        button.className = `day-tab ${index === state.currentDay ? "active" : ""}`;
+        button.textContent = day.day;
+        button.addEventListener("click", () => {
+          state.currentDay = index;
+          renderDayTabs();
+          renderCurrentDay();
+        });
+        container.appendChild(button);
+      });
+    }
+
+    function renderCurrentDay() {
+      const day = state.plan[state.currentDay];
+      if (!day) return;
+
+      el("daySummary").innerHTML = `
+        <div class="summary-chip">${format(day.totalCalories)} kcal aproximadas</div>
+        <div class="summary-chip">${format(day.totalProtein)} g de proteína</div>
+        <div class="summary-chip">${format(getTargets().water / 1000, 2)} L de água</div>
+      `;
+
+      const container = el("mealList");
+      container.innerHTML = "";
+
+      day.meals.forEach((meal, mealIndex) => {
+        const card = document.createElement("article");
+        card.className = "meal-card";
+
+        const foodsHtml = meal.items.map((item, itemIndex) => `
+          <div class="food-item-row">
+            <div class="food-item-main">
+              <span class="food-item-label">${getItemLabel(item)}</span>
+              <div class="food-item-name">
+                ${item.name} <strong>(${portionText(item.finalAmount, item.unit, item.name)})</strong>
+              </div>
+            </div>
+            <button
+              class="item-swap-button"
+              type="button"
+              data-item-index="${itemIndex}"
+            >
+              Trocar alimento
+            </button>
+          </div>
+        `).join("");
+
+        card.innerHTML = `
+          <div class="meal-top">
+            <div class="meal-name">
+              <div class="meal-icon">${mealIcons[meal.name] || "🍽️"}</div>
+              <h3>${meal.name}</h3>
+            </div>
+            <div class="meal-macros">
+              ${format(meal.calories)} kcal<br>
+              ${format(meal.protein)} g proteína
+            </div>
+          </div>
+
+          <div class="food-items">${foodsHtml}</div>
+
+          <div class="meal-actions">
+            <button class="swap-button" type="button">Trocar refeição inteira</button>
+          </div>
+        `;
+
+        card.querySelector(".swap-button").addEventListener("click", () => swapMeal(mealIndex));
+
+        card.querySelectorAll(".item-swap-button").forEach(button => {
+          button.addEventListener("click", () => swapMealItem(mealIndex, Number(button.dataset.itemIndex)));
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+
+    function swapMealItem(mealIndex, itemIndex) {
+      const targets = getTargets();
+      const groups = {
+        proteins: selectedFoods("proteins"),
+        carbs: selectedFoods("carbs"),
+        fruits: selectedFoods("fruits"),
+        vegetables: selectedFoods("vegetables")
+      };
+
+      const currentDay = state.plan[state.currentDay];
+      const meal = currentDay?.meals?.[mealIndex];
+      const item = meal?.items?.[itemIndex];
+
+      if (!meal || !item) return;
+
+      const pool = getSwapPool(meal.name, item, groups);
+      if (!pool.length) return;
+
+      if (pool.length === 1 && pool[0].id === item.id) {
+        return;
+      }
+
+      const key = `${state.currentDay}-${mealIndex}-${itemIndex}`;
+      state.itemSwapCounters[key] = (state.itemSwapCounters[key] || 0) + 1;
+
+      const currentIndex = Math.max(0, pool.findIndex(food => food.id === item.id));
+      let nextIndex = (currentIndex + state.itemSwapCounters[key]) % pool.length;
+
+      if (pool[nextIndex]?.id === item.id && pool.length > 1) {
+        nextIndex = (nextIndex + 1) % pool.length;
+      }
+
+      const nextFood = pool[nextIndex];
+      meal.items[itemIndex] = buildMealItem(
+        nextFood,
+        item.role,
+        item.sourceGroup,
+        item.swapKey
+      );
+
+      const rescaled = scaleDay(currentDay.meals, targets);
+      currentDay.meals = rescaled.meals;
+      currentDay.totalCalories = rescaled.totalCalories;
+      currentDay.totalProtein = rescaled.totalProtein;
+
+      renderCurrentDay();
+      renderPrintLayout();
+    }
+
+    function swapMeal(mealIndex) {
+      const targets = getTargets();
+      const groups = {
+        proteins: selectedFoods("proteins"),
+        carbs: selectedFoods("carbs"),
+        fruits: selectedFoods("fruits"),
+        vegetables: selectedFoods("vegetables")
+      };
+
+      const key = `${state.currentDay}-${mealIndex}`;
+      state.swapCounters[key] = (state.swapCounters[key] || 0) + 1;
+
+      const currentDay = state.plan[state.currentDay];
+      const mealName = currentDay.meals[mealIndex].name;
+
+      currentDay.meals[mealIndex] = createMeal(
+        mealName,
+        state.currentDay,
+        mealIndex,
+        groups,
+        state.swapCounters[key]
+      );
+
+      const rescaled = scaleDay(currentDay.meals, targets);
+      currentDay.meals = rescaled.meals;
+      currentDay.totalCalories = rescaled.totalCalories;
+      currentDay.totalProtein = rescaled.totalProtein;
+
+      renderCurrentDay();
+      renderPrintLayout();
+    }
+
+
+    function resetAllData() {
+      apiRequest("/api/preferences", { method: "DELETE" }).catch(() => {});
+
+      el("name").value = "";
+      weight.value = "0";
+      mealCount.value = "4";
+      routine.value = "normal";
+      calorieFactor.value = "20";
+      proteinFactor.value = "2";
+      el("avoid").value = "";
+
+      const balancedGoal = document.querySelector('input[name="goal"][value="balanced"]');
+      if (balancedGoal) balancedGoal.checked = true;
+
+      document.querySelectorAll('.chip input[type="checkbox"]').forEach(input => {
+        const item = foodData[input.dataset.group].items.find(i => i.id === input.value);
+        input.checked = !!item?.common;
+      });
+
+      state.plan = [];
+      state.currentDay = 0;
+      state.editingPlanId = null;
+      state.swapCounters = {};
+      state.itemSwapCounters = {};
+
+      el("formError").textContent = "";
+      el("dayTabs").innerHTML = "";
+      el("daySummary").innerHTML = "";
+      el("mealList").innerHTML = "";
+      el("printPlan").innerHTML = "";
+      el("planTitle").textContent = "Plano semanal";
+      el("planSubtitle").textContent = "O planejamento será exibido após o preenchimento das etapas anteriores.";
+      el("planName").value = "";
+      updatePlanSaveState();
+      switchView("planner");
+
+      updateFoodCounts();
+      updateTargets();
+      goToStep(1);
+
+      el("saveStatus").textContent = "Tudo foi zerado";
+    }
+
+    async function savePreferences() {
+      const data = collectPreferences();
+
+      try {
+        await apiRequest("/api/preferences", {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
+        el("saveStatus").textContent = "Preferências salvas no SQLite";
+      } catch (error) {
+        el("saveStatus").textContent = "Não foi possível salvar as preferências";
+      }
+    }
+
+    async function loadPreferences() {
+      try {
+        const data = await apiRequest("/api/preferences");
+        if (data && Object.keys(data).length) applyPreferences(data);
+      } catch (error) {
+        console.warn("Não foi possível carregar as preferências.", error);
+      }
+    }
+
+
+    const SAVED_PLANS_KEY = "nutritionSavedPlansV1";
+    const APP_SETTINGS_KEY = "nutritionAppSettingsV1";
+
+    const defaultAppSettings = {
+      brandName: "NutriPlan",
+      brandSubtitle: "Planejamento alimentar",
+      professionalName: "",
+      footerText: "Este material é uma estimativa automática e não substitui avaliação profissional.",
+      logoData: "",
+      theme: "teal"
+    };
+
+    const themeMap = {
+      teal: {
+        primary: "#0f766e",
+        hover: "#115e59",
+        soft: "#e8f7f4",
+        border: "#a8ddd5"
+      },
+      navy: {
+        primary: "#1e3a8a",
+        hover: "#172554",
+        soft: "#eef2ff",
+        border: "#c7d2fe"
+      },
+      blue: {
+        primary: "#2563eb",
+        hover: "#1d4ed8",
+        soft: "#eff6ff",
+        border: "#bfdbfe"
+      },
+      green: {
+        primary: "#047857",
+        hover: "#065f46",
+        soft: "#ecfdf5",
+        border: "#a7f3d0"
+      },
+      graphite: {
+        primary: "#475569",
+        hover: "#334155",
+        soft: "#f1f5f9",
+        border: "#cbd5e1"
+      }
+    };
+
+    let toastTimer = null;
+    let pendingLogoData = "";
+    let cachedAppSettings = { ...defaultAppSettings };
+
+    async function apiRequest(url, options = {}) {
+      const config = {
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        ...options
+      };
+
+      const response = await fetch(url, config);
+      const contentType = response.headers.get("content-type") || "";
+      const payload = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+      if (!response.ok) {
+        const message = typeof payload === "object" && payload?.error
+          ? payload.error
+          : "Não foi possível concluir a operação.";
+        throw new Error(message);
+      }
+
+      return payload;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function cloneData(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function showToast(message) {
+      const toast = el("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+    }
+
+    function getBrandInitials(name) {
+      const parts = String(name || "NutriPlan")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      return parts
+        .slice(0, 2)
+        .map(part => part[0])
+        .join("")
+        .toUpperCase() || "NUT";
+    }
+
+    function getAppSettings() {
+      return { ...defaultAppSettings, ...cachedAppSettings };
+    }
+
+    async function loadAppSettings() {
+      try {
+        const settings = await apiRequest("/api/settings");
+        cachedAppSettings = { ...defaultAppSettings, ...(settings || {}) };
+      } catch (error) {
+        cachedAppSettings = { ...defaultAppSettings };
+      }
+      return cachedAppSettings;
+    }
+
+    async function saveAppSettings(settings) {
+      const saved = await apiRequest("/api/settings", {
+        method: "PUT",
+        body: JSON.stringify(settings)
+      });
+      cachedAppSettings = { ...defaultAppSettings, ...(saved || settings) };
+      return cachedAppSettings;
+    }
+
+    function applyTheme(themeName) {
+      const theme = themeMap[themeName] || themeMap.teal;
+      const root = document.documentElement;
+      root.style.setProperty("--primary", theme.primary);
+      root.style.setProperty("--primary-hover", theme.hover);
+      root.style.setProperty("--primary-soft", theme.soft);
+      root.style.setProperty("--primary-border", theme.border);
+    }
+
+    function setLogoElement(imageId, fallbackId, logoData, fallbackText) {
+      const image = el(imageId);
+      const fallback = el(fallbackId);
+
+      if (logoData) {
+        image.src = logoData;
+        image.classList.remove("hidden");
+        fallback.classList.add("hidden");
+      } else {
+        image.removeAttribute("src");
+        image.classList.add("hidden");
+        fallback.textContent = fallbackText;
+        fallback.classList.remove("hidden");
+      }
+    }
+
+    function applyAppSettings(settings = getAppSettings()) {
+      applyTheme(settings.theme);
+
+      el("sidebarBrandName").textContent = settings.brandName;
+      el("sidebarBrandSubtitle").textContent = settings.brandSubtitle;
+
+      const initials = getBrandInitials(settings.brandName);
+      setLogoElement("sidebarLogo", "sidebarLogoFallback", settings.logoData, initials);
+      setLogoElement("settingsLogoImage", "settingsLogoFallback", settings.logoData, "SEM LOGO");
+
+      el("brandNameInput").value = settings.brandName;
+      el("brandSubtitleInput").value = settings.brandSubtitle;
+      el("professionalNameInput").value = settings.professionalName;
+      el("footerTextInput").value = settings.footerText;
+
+      const themeRadio = document.querySelector(`input[name="appTheme"][value="${settings.theme}"]`);
+      if (themeRadio) themeRadio.checked = true;
+
+      pendingLogoData = settings.logoData || "";
+
+      if (state.plan.length) {
+        renderPrintLayout();
+      }
+    }
+
+    function switchView(viewName) {
+      state.currentView = viewName;
+
+      document.querySelectorAll(".app-view").forEach(view => {
+        view.classList.toggle("active", view.id === `${viewName}View`);
+      });
+
+      document.querySelectorAll("[data-view]").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === viewName);
+      });
+
+      const plannerVisible = viewName === "planner";
+      el("plannerSteps").classList.toggle("hidden", !plannerVisible);
+      el("sidebarSummary").classList.toggle("hidden", !plannerVisible);
+
+      const viewCopy = {
+        planner: {
+          eyebrow: "Planejamento",
+          title: "Novo plano alimentar",
+          subtitle: "Preencha os dados para montar um cronograma personalizado."
+        },
+        saved: {
+          eyebrow: "Biblioteca",
+          title: "Planos salvos",
+          subtitle: "Gerencie os planejamentos armazenados no banco de dados SQLite."
+        },
+        settings: {
+          eyebrow: "Personalização",
+          title: "Configurações",
+          subtitle: "Ajuste marca, logotipo, impressão e aparência."
+        }
+      };
+
+      const copy = viewCopy[viewName] || viewCopy.planner;
+      el("pageEyebrow").textContent = copy.eyebrow;
+      el("pageTitle").textContent = copy.title;
+      el("pageSubtitle").textContent = copy.subtitle;
+
+      if (viewName === "saved") renderSavedPlans();
+      if (viewName === "settings") applyAppSettings(getAppSettings());
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function getSavedPlans() {
+      const payload = await apiRequest("/api/plans");
+      return Array.isArray(payload) ? payload : [];
+    }
+
+    function collectPreferences() {
+      return {
+        name: el("name").value.trim(),
+        weight: weight.value,
+        mealCount: mealCount.value,
+        routine: routine.value,
+        goal: document.querySelector('input[name="goal"]:checked')?.value || "balanced",
+        calorieFactor: calorieFactor.value,
+        proteinFactor: proteinFactor.value,
+        avoid: el("avoid").value.trim(),
+        selected: [...document.querySelectorAll(".chip input:checked")].map(input => input.value)
+      };
+    }
+
+    function applyPreferences(preferences = {}) {
+      el("name").value = preferences.name || "";
+      weight.value = preferences.weight || "0";
+      mealCount.value = preferences.mealCount || "4";
+      routine.value = preferences.routine || "normal";
+      calorieFactor.value = preferences.calorieFactor || "20";
+      proteinFactor.value = preferences.proteinFactor || "2";
+      el("avoid").value = preferences.avoid || "";
+
+      const goal = document.querySelector(
+        `input[name="goal"][value="${preferences.goal || "balanced"}"]`
+      );
+      if (goal) goal.checked = true;
+
+      if (Array.isArray(preferences.selected)) {
+        document.querySelectorAll(".chip input[type='checkbox']").forEach(input => {
+          input.checked = preferences.selected.includes(input.value);
+        });
+      }
+
+      updateFoodCounts();
+      updateTargets();
+    }
+
+    function createPlanId() {
+      if (window.crypto?.randomUUID) return crypto.randomUUID();
+      return `plan-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function updatePlanSaveState() {
+      const editing = Boolean(state.editingPlanId);
+      el("editingBadge").classList.toggle("hidden", !editing);
+      el("savePlan").textContent = editing ? "Salvar alterações" : "Salvar plano";
+    }
+
+    async function saveCurrentPlan() {
+      if (!state.plan.length) {
+        showToast("Gere o planejamento antes de salvar.");
+        return;
+      }
+
+      const preferences = collectPreferences();
+      const targets = getTargets();
+      const title = el("planName").value.trim()
+        || (preferences.name ? `Plano semanal - ${preferences.name}` : "Plano semanal");
+
+      const record = {
+        title,
+        clientName: preferences.name || "Sem nome",
+        preferences,
+        targets: {
+          calories: targets?.calories || 0,
+          protein: targets?.protein || 0,
+          water: targets?.water || 0
+        },
+        plan: cloneData(state.plan)
+      };
+
+      try {
+        const editing = Boolean(state.editingPlanId);
+        const saved = await apiRequest(
+          editing ? `/api/plans/${encodeURIComponent(state.editingPlanId)}` : "/api/plans",
+          {
+            method: editing ? "PUT" : "POST",
+            body: JSON.stringify(record)
+          }
+        );
+
+        state.editingPlanId = saved.id;
+        updatePlanSaveState();
+        await renderSavedPlans();
+        showToast(editing ? "Alterações salvas no SQLite." : "Plano salvo no SQLite.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    async function loadSavedPlan(planId) {
+      try {
+        const plan = await apiRequest(`/api/plans/${encodeURIComponent(planId)}`);
+
+        applyPreferences(plan.preferences);
+        state.plan = cloneData(plan.plan);
+        state.currentDay = 0;
+        state.editingPlanId = plan.id;
+        state.swapCounters = {};
+        state.itemSwapCounters = {};
+
+        el("planName").value = plan.title;
+        el("planTitle").textContent = plan.clientName && plan.clientName !== "Sem nome"
+          ? `Plano de ${plan.clientName}`
+          : plan.title;
+        el("planSubtitle").textContent = "Plano salvo carregado para edição.";
+
+        renderDayTabs();
+        renderCurrentDay();
+        renderPrintLayout();
+        updatePlanSaveState();
+
+        switchView("planner");
+        goToStep(3);
+        showToast("Plano carregado para edição.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    async function duplicateSavedPlan(planId) {
+      try {
+        await apiRequest(`/api/plans/${encodeURIComponent(planId)}/duplicate`, {
+          method: "POST",
+          body: JSON.stringify({})
+        });
+        await renderSavedPlans(el("savedSearch").value);
+        showToast("Plano duplicado no SQLite.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    async function deleteSavedPlan(planId) {
+      const confirmed = window.confirm("Excluir este plano definitivamente do banco de dados?");
+      if (!confirmed) return;
+
+      try {
+        await apiRequest(`/api/plans/${encodeURIComponent(planId)}`, { method: "DELETE" });
+
+        if (state.editingPlanId === planId) {
+          state.editingPlanId = null;
+          updatePlanSaveState();
+        }
+
+        await renderSavedPlans(el("savedSearch").value);
+        showToast("Plano excluído do SQLite.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function formatSavedDate(dateValue) {
+      const date = new Date(dateValue);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+    }
+
+    async function renderSavedPlans(filterValue = "") {
+      const list = el("savedPlansList");
+      const empty = el("savedEmpty");
+      const filter = String(filterValue).trim().toLocaleLowerCase("pt-BR");
+
+      try {
+        const allPlans = await getSavedPlans();
+        const plans = allPlans.filter(plan => {
+          if (!filter) return true;
+          return `${plan.title} ${plan.clientName}`
+            .toLocaleLowerCase("pt-BR")
+            .includes(filter);
+        });
+
+        list.innerHTML = "";
+        empty.classList.toggle("hidden", plans.length > 0);
+        list.classList.toggle("hidden", plans.length === 0);
+
+        plans.forEach(plan => {
+          const card = document.createElement("article");
+          card.className = "saved-plan-card";
+
+          card.innerHTML = `
+            <div class="saved-plan-top">
+              <div style="min-width:0">
+                <h3 class="saved-plan-title">${escapeHtml(plan.title)}</h3>
+                <div class="saved-plan-client">${escapeHtml(plan.clientName || "Sem nome")}</div>
+              </div>
+              <div class="saved-plan-date">Atualizado em ${formatSavedDate(plan.updatedAt)}</div>
+            </div>
+
+            <div class="saved-plan-metrics">
+              <div class="saved-metric">
+                <small>Calorias</small>
+                <strong>${format(plan.targets?.calories || 0)} kcal</strong>
+              </div>
+              <div class="saved-metric">
+                <small>Proteína</small>
+                <strong>${format(plan.targets?.protein || 0)} g</strong>
+              </div>
+              <div class="saved-metric">
+                <small>Refeições</small>
+                <strong>${plan.preferences?.mealCount || 0}/dia</strong>
+              </div>
+            </div>
+
+            <div class="saved-plan-actions">
+              <button class="primary" type="button" data-action="edit">Abrir e editar</button>
+              <button class="secondary" type="button" data-action="duplicate">Duplicar</button>
+              <button class="danger-button" type="button" data-action="delete">Excluir</button>
+            </div>
+          `;
+
+          card.querySelector("[data-action='edit']").addEventListener("click", () => loadSavedPlan(plan.id));
+          card.querySelector("[data-action='duplicate']").addEventListener("click", () => duplicateSavedPlan(plan.id));
+          card.querySelector("[data-action='delete']").addEventListener("click", () => deleteSavedPlan(plan.id));
+          list.appendChild(card);
+        });
+      } catch (error) {
+        list.innerHTML = "";
+        empty.classList.remove("hidden");
+        list.classList.add("hidden");
+        showToast(error.message);
+      }
+    }
+
+    function startNewPlan() {
+      el("name").value = "";
+      weight.value = "0";
+      mealCount.value = "4";
+      routine.value = "normal";
+      calorieFactor.value = "20";
+      proteinFactor.value = "2";
+      el("avoid").value = "";
+      el("foodSearch").value = "";
+
+      const balanced = document.querySelector('input[name="goal"][value="balanced"]');
+      if (balanced) balanced.checked = true;
+
+      document.querySelectorAll(".chip input[type='checkbox']").forEach(input => {
+        const item = foodData[input.dataset.group].items.find(food => food.id === input.value);
+        input.checked = Boolean(item?.common);
+      });
+
+      state.plan = [];
+      state.currentDay = 0;
+      state.editingPlanId = null;
+      state.swapCounters = {};
+      state.itemSwapCounters = {};
+
+      el("planName").value = "";
+      el("planTitle").textContent = "Plano semanal";
+      el("planSubtitle").textContent = "O planejamento será exibido após o preenchimento das etapas anteriores.";
+      el("dayTabs").innerHTML = "";
+      el("daySummary").innerHTML = "";
+      el("mealList").innerHTML = "";
+      el("printPlan").innerHTML = "";
+      el("formError").textContent = "";
+
+      updateFoodCounts();
+      updateTargets();
+      updatePlanSaveState();
+      switchView("planner");
+      goToStep(1);
+      showToast("Novo planejamento iniciado.");
+    }
+
+    function exportSavedPlans() {
+      window.location.href = "/api/export";
+      showToast("Preparando backup do banco de dados.");
+    }
+
+    function resizeLogoFile(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) {
+          reject(new Error("Selecione um arquivo de imagem."));
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = event => {
+          const image = new Image();
+
+          image.onload = () => {
+            const maxWidth = 700;
+            const maxHeight = 280;
+            const ratio = Math.min(1, maxWidth / image.width, maxHeight / image.height);
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(image.width * ratio));
+            canvas.height = Math.max(1, Math.round(image.height * ratio));
+
+            const context = canvas.getContext("2d");
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            resolve(canvas.toDataURL("image/png", 0.92));
+          };
+
+          image.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+          image.src = event.target.result;
+        };
+
+        reader.onerror = () => reject(new Error("Falha ao carregar o arquivo."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleLogoUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("A imagem deve ter no máximo 5 MB.");
+        event.target.value = "";
+        return;
+      }
+
+      try {
+        pendingLogoData = await resizeLogoFile(file);
+        setLogoElement("settingsLogoImage", "settingsLogoFallback", pendingLogoData, "SEM LOGO");
+        showToast("Prévia do logotipo atualizada. Salve as configurações.");
+      } catch (error) {
+        showToast(error.message || "Não foi possível carregar a imagem.");
+      }
+    }
+
+    async function saveSettingsFromForm() {
+      const settings = {
+        brandName: el("brandNameInput").value.trim() || defaultAppSettings.brandName,
+        brandSubtitle: el("brandSubtitleInput").value.trim() || defaultAppSettings.brandSubtitle,
+        professionalName: el("professionalNameInput").value.trim(),
+        footerText: el("footerTextInput").value.trim() || defaultAppSettings.footerText,
+        logoData: pendingLogoData,
+        theme: document.querySelector('input[name="appTheme"]:checked')?.value || "teal"
+      };
+
+      try {
+        const saved = await saveAppSettings(settings);
+        applyAppSettings(saved);
+        showToast("Configurações salvas no SQLite.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function removeConfiguredLogo() {
+      pendingLogoData = "";
+      setLogoElement("settingsLogoImage", "settingsLogoFallback", "", "SEM LOGO");
+      showToast("Logotipo removido da prévia. Salve as configurações.");
+    }
+
+    async function resetAppSettings() {
+      const confirmed = window.confirm("Restaurar as configurações visuais padrão?");
+      if (!confirmed) return;
+
+      try {
+        const settings = await apiRequest("/api/settings", { method: "DELETE" });
+        cachedAppSettings = { ...defaultAppSettings, ...(settings || {}) };
+        applyAppSettings(cachedAppSettings);
+        showToast("Configurações restauradas no SQLite.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+
+    renderFoodGroups();
+    updateTargets();
+
+    document.querySelectorAll("[data-step]").forEach(button => {
+      button.addEventListener("click", () => goToStep(Number(button.dataset.step)));
+    });
+
+    document.querySelectorAll("[data-next]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!getTargets()) return;
+        goToStep(Number(button.dataset.next));
+      });
+    });
+
+    document.querySelectorAll("[data-back]").forEach(button => {
+      button.addEventListener("click", () => goToStep(Number(button.dataset.back)));
+    });
+
+    [weight, calorieFactor, proteinFactor, mealCount, routine, el("name"), el("avoid")].forEach(input => {
+      input.addEventListener("input", updateTargets);
+      input.addEventListener("change", savePreferences);
+    });
+
+    document.querySelectorAll('input[name="goal"]').forEach(input => {
+      input.addEventListener("change", () => {
+        calorieFactor.value = getGoalFactor();
+        updateTargets();
+      });
+    });
+
+    el("commonPreset").addEventListener("click", () => applyPreset("common"));
+    el("noFishPreset").addEventListener("click", () => applyPreset("noFish"));
+    el("noMilkPreset").addEventListener("click", () => applyPreset("noMilk"));
+    el("vegetarianPreset").addEventListener("click", () => applyPreset("vegetarian"));
+    el("selectAll").addEventListener("click", () => applyPreset("all"));
+    el("clearAll").addEventListener("click", () => applyPreset("clear"));
+    el("foodSearch").addEventListener("input", filterFoods);
+    el("generatePlan").addEventListener("click", () => generatePlan(0));
+    el("newPlan").addEventListener("click", () => generatePlan(Math.floor(Math.random() * 10) + 1));
+    el("resetAll").addEventListener("click", resetAllData);
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    el("topNewPlan").addEventListener("click", startNewPlan);
+    el("createPlanFromSaved").addEventListener("click", startNewPlan);
+    el("emptyCreatePlan").addEventListener("click", startNewPlan);
+    el("savePlan").addEventListener("click", saveCurrentPlan);
+    el("savedSearch").addEventListener("input", event => renderSavedPlans(event.target.value));
+    el("exportPlans").addEventListener("click", exportSavedPlans);
+    el("logoInput").addEventListener("change", handleLogoUpload);
+    el("removeLogo").addEventListener("click", removeConfiguredLogo);
+    el("saveSettings").addEventListener("click", saveSettingsFromForm);
+    el("resetSettings").addEventListener("click", resetAppSettings);
+
+    document.querySelectorAll('input[name="appTheme"]').forEach(input => {
+      input.addEventListener("change", () => applyTheme(input.value));
+    });
+
+    async function initializeApplication() {
+      await loadAppSettings();
+      applyAppSettings(getAppSettings());
+      await renderSavedPlans();
+      updatePlanSaveState();
+      switchView("planner");
+    }
+
+    initializeApplication();
+  
+  </script>
+</body>
+</html>

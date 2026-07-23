@@ -1,0 +1,31 @@
+PLANEJAMENTO NUTRICIONAL COM FLASK + SQLITE
+
+BANCO DE DADOS
+- Arquivo: database.sqlite3
+- O banco é criado automaticamente ao iniciar o sistema.
+- Fechar o navegador ou o servidor NÃO apaga os planos.
+- Os dados permanecem no arquivo database.sqlite3.
+
+COMO INICIAR NO WINDOWS
+1. Extraia todo o arquivo ZIP.
+2. Clique duas vezes em INICIAR.bat.
+3. Aguarde a instalação do Flask.
+4. O navegador abrirá em http://127.0.0.1:5000
+
+IMPORTANTE
+- Não abra templates/index.html diretamente.
+- O sistema precisa ser iniciado pelo arquivo INICIAR.bat ou pelo comando python app.py.
+- Para fazer backup completo, copie o arquivo database.sqlite3.
+- Também é possível exportar os planos em JSON pela tela Planos salvos.
+
+TABELAS DO SQLITE
+- plans: planos alimentares salvos
+- settings: logo, marca, tema e impressão
+- preferences: último conjunto de preferências informado
+
+COMANDOS MANUAIS
+python -m pip install -r requirements.txt
+python app.py
+
+ENDEREÇO LOCAL
+http://127.0.0.1:5000
